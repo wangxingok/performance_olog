@@ -1,0 +1,14 @@
+.settings/
+.project
+.classpath
+.DS_Store
+
+*.iml
+/.idea
+
+*.pdb
+target/
+*.log
+*.log.*
+.externalToolBuilders
+Thumbs.db
