@@ -1,7 +1,8 @@
 package com.jss.module.performance.olog.interceptor;
 
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.jss.module.performance.olog.domain.MethodStats;
+import com.jss.module.performance.olog.kafka.KafkaProducer;
+import com.jss.module.performance.olog.redis.JedisUtil;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang3.StringUtils;
@@ -9,9 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.jss.module.performance.olog.domain.MethodStats;
-import com.jss.module.performance.olog.kafka.KafkaProducer;
-import com.jss.module.performance.olog.redis.JedisUtil;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 基于AOP拦截指定类型的方法，基于SLF4J输出类包、方法名及方法执行时间
@@ -69,6 +68,27 @@ public class PerfInterceptor implements MethodInterceptor {
 	 */
 	@Value("${performance.log.redis.port}")
 	private int redisPort;
+
+	//redis 工具类
+	private JedisUtil jedisUtil;
+
+	// kafka 生成者
+	private KafkaProducer kafkaProducer;
+
+	//获取 redis 工具类实例
+	private JedisUtil getJedisUtil(){
+		if(jedisUtil==null) {
+			jedisUtil = new JedisUtil(redisHost, redisPort);
+		}
+		return jedisUtil;
+	}
+
+	private KafkaProducer getKafkaProducer(){
+		if(kafkaProducer == null) {
+			kafkaProducer = new KafkaProducer(kafkatopic, kafkabroker);
+		}
+		return kafkaProducer;
+	}
 	
 	/**
 	 * 被调用方法缓存区
@@ -123,13 +143,13 @@ public class PerfInterceptor implements MethodInterceptor {
 				switch (fileDest) {
 				// 输出到kafka
 				case "kafka":
-					KafkaProducer kp = new KafkaProducer(kafkatopic, kafkabroker);
+					KafkaProducer kp = this.getKafkaProducer();
 					kp.sendMsg(message);
 					kp.close();
 					break;
 				// 输出到redis
 				case "redis":
-					JedisUtil jedis = new JedisUtil(redisHost, redisPort);
+					JedisUtil jedis = this.getJedisUtil();
 					jedis.lpush("perfolog", message);
 					jedis.close();
 					break;
