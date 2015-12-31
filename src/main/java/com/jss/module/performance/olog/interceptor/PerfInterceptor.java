@@ -145,13 +145,11 @@ public class PerfInterceptor implements MethodInterceptor {
 				case "kafka":
 					KafkaProducer kp = this.getKafkaProducer();
 					kp.sendMsg(message);
-					kp.close();
 					break;
 				// 输出到redis
 				case "redis":
 					JedisUtil jedis = this.getJedisUtil();
 					jedis.lpush("perfolog", message);
-					jedis.close();
 					break;
 				// 默认输出到日志文件
 				default:
