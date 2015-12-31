@@ -18,7 +18,8 @@
 	<bean id="performanceMonitor"
 		class="org.springframework.aop.interceptor.PerformanceMonitorInterceptor" />
 
-	<bean id="perfInterceptor" class="com.jss.module.performance.olog.interceptor.PerfInterceptor" />
+	<!-- destroy-method="destroy" 指定spirng容器销毁时调用 PerfInterceptor 的 destroy 方法 -->
+	<bean id="perfInterceptor" class="com.jss.module.performance.olog.interceptor.PerfInterceptor" destroy-method="destroy" />
 
 	<aop:config>
 		<aop:pointcut id="allControllerMethods"

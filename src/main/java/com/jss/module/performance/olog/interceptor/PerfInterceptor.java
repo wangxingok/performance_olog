@@ -169,4 +169,20 @@ public class PerfInterceptor implements MethodInterceptor {
 		logger.info(stats.toString()+"  interceptorExecuted time: "+stats.getInterceptorElapsedTime()+" ms.");
 		*/
 	}
+
+	/**
+	 * spring 销毁时调用的方法
+	 */
+	public void destroy(){
+		try {
+			this.getJedisUtil().close();
+		} catch (Exception ex){
+			logger.error("destroy jedis error", ex);
+		}
+		try {
+			this.getKafkaProducer().close();
+		} catch (Exception ex) {
+			logger.error("destroy kafka producer error", ex);
+		}
+	}
 }
